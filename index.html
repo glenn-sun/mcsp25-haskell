@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Title</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.2/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.2/theme/simple.css" id="theme">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=open_in_new" />
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <div class="vertical-center">
+          <h1>Monads, Categories, and<br>the Structure of Programming</h1>
+          <p class="subhead">Day 1: Monads and Functional Programming</p>
+          <p class="center"><br>Mathcamp 2025</p>
+          <p class="center">Glenn Sun</p>
+        </div>
+      </section>
+
+      <section>
+        <div class="vertical-center">
+          <p class="center"><em>"A monad is a monoid in the category of endofunctors."</em></p>
+        </div>
+      </section>
+
+      <section>
+        <div class="vertical-center">
+          <a href="https://ncatlab.org/nlab/show/carrying" target="_blank">nLab: carrying <span class="material-symbols-outlined">
+            open_in_new
+          </span></a>
+        </div>
+      </section>
+
+      <section>
+        <div class="vertical-center">
+          <p class="center"><em>"A monad is a monoid in the category of endofunctors."</em></p>
+          <p class="center">____________ is ________________ for ___________________.</p>
+        </div>
+      </section>
+      <section>
+        <div class="vertical-center">
+          <p>In Java, is <code class="tt">List</code> a type?</p>
+          <p class="answer fragment" data-fragment-index="1">No, but <code class="tt">List&lt;T&gt;</T></code> is for any type <code class="tt">T</code>.</p>
+          <p>In C++, is <code class="tt">std::vector</code> a type?</p>
+          <p class="answer fragment" data-fragment-index="1">No, but <code class="tt">std::vector&lt;T&gt;</T></code> is for any type <code class="tt">T</code>.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="center">endofunctor $\longleftrightarrow$ type constructor</h2>
+        <p>In Java, examples of type constructors include:</p>
+        <ul>
+          <li><code class="tt">List</code> (which produces types <code class="tt">List&lt;T&gt;</code>)</li>
+          <li><code class="tt">Map</code> (which produces types <code class="tt">Map&lt;K, V&gt;</code>)</li>
+          <li><code class="tt">Set</code> (which produces types <code class="tt">Set&lt;T&gt;</code>)</li>
+        </ul>
+        <p>In C++, examples of type constructors include:</p>
+        <ul>
+          <li><code class="tt">std::vector</code> (which produces types <code class="tt">std::vector&lt;T&gt;</code>)</li>
+          <li><code class="tt">std::map</code> (which produces types <code class="tt">std::map&lt;K, V&gt;</code>)</li>
+          <li><code class="tt">std::set</code> (which produces types <code class="tt">std::set&lt;T&gt;</code>)</li>
+        </ul>
+      </section>
+
+      <section>
+        <div class="vertical-center">
+          <p class="center"><em>"A monad is a monoid in the category of endofunctors."</em></p>
+          <p class="center">____________ is ________________ for type constructors.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="center">monad $\longleftrightarrow$ type constructor with <em>flattening</em></h2>
+        <p class="center">Canonical example: lists</p>
+        <pre class="fragment" data-fragment-index="1"><code data-trim class="language-text">
+          [[1, 2, 3], 
+           [4, 5, 6], 
+           [7, 8, 9]]
+        </code></pre>
+        <p class="center fragment" data-fragment-index="2">$\downarrow$</p>
+        <pre class="fragment" data-fragment-index="2"><code data-trim class="language-text">
+          [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        </code></pre>
+      </section>
+
+      <section>
+        <div class="vertical-center">
+          <p class="center"><em>"A monad is a monoid in the category of endofunctors."</em></p>
+          <p class="center">Flattening is ________________ for type constructors.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="center">monoid $\longleftrightarrow$ <em>type</em> with <em>concatenation</em></h2>
+        <ul>
+          <li class="fragment" data-fragment-index="1">Lists 
+            <pre><code data-trim class="language-text">
+              [1, 2, 3] ++ [4, 5, 6] == [1, 2, 3, 4, 5, 6]
+            </code></pre>
+          </li>
+          <li class="fragment" data-fragment-index="2">Strings 
+            <pre><code data-trim class="language-text">
+              "hello" ++ "world" == "helloworld"
+            </code></pre>
+          </li>
+          <li class="fragment" data-fragment-index="3">Natural numbers (concatenation in unary) 
+            <pre><code data-trim class="language-text">
+              3 ++ 5 == 8
+            </code></pre>
+          </li>
+        </ul>
+      </section>  
+      
+      <section>
+        <div class="vertical-center">
+          <p class="center"><em>"A monad is a monoid in the category of endofunctors."</em></p>
+          <p class="center">Flattening is concatenation of type constructors.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Concatenation of type constructors</h2>
+        <p>Concatenation of lists has type signature: $$\pplus : \texttt{List&lt;T&gt;} \times \texttt{List&lt;T&gt;} \to \texttt{List&lt;T&gt;}$$ </p>
+        <p>Concatanation of the <em>type constructor</em> <code class="tt">List</code> has type signature: $$\pplus : \texttt{List&lt;List&lt;T&gt;&gt;}\to \texttt{List&lt;T&gt;} $$</p>
+        <p>This is flattening!</p>
+      </section>
+
+      <section>
+        <h2>Outline</h2>
+        <p>Today: What are monads and why are they useful?</p>
+        <p>Tomorrow: More about categories and monoids</p>
+      </section>
+
+      <section>
+        <div class="vertical-center">
+          <p>In your favorite language, are the following two pieces of code equivalent (ignoring differences in running time) for any function $f : \texttt{int} \to \texttt{int}$? </p>
+          <ol>
+            <li><code class="tt">f(x) + f(x)</code></li>
+            <li><code class="tt">f(x) * 2</code></li>
+          </ol>
+          <p class="answer fragment" data-fragment-index="1">No, consider the following code.</p>
+          <pre class="fragment" data-fragment-index="1"><code data-trim class="language-java">
+            public static int f(int x) {
+              System.out.println("User executed f");
+              return x + 1;
+            }
+          </code></pre>
+        </div>
+      </section>
+
+      <section>
+        <h2>Pure functions</h2>
+        <p>A <em>pure</em> function is <em>deterministic</em> and has no <em>side effects</em>.</p>
+        <p class="fragment">Side effects change the state of the system outside the function.</p>
+        <ul class="fragment">
+          <li>Input and output</li>
+          <li>File system access</li>
+          <li>Throwing exceptions</li>
+          <li>Global variables</li>
+          <li>Mutable function parameters</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Functional programming</h2>
+        <p><em>Functional programming</em> is a style that focuses on:</p>
+        <ul>
+          <li>Pure functions</li>
+          <li class="fragment" data-fragment-index="1">Immutable data</li>
+          <li class="fragment" data-fragment-index="2">Declarative, not imperative code</li>
+          <pre class="fragment" data-fragment-index="2"><code data-trim class="language-python">
+            def odd_squares(arr):
+              return (arr.filter(lambda x: x % 2 == 1)
+                         .map(lambda x: x ** 2))
+          </code></pre>
+        </ul>
+        <p class="fragment" data-fragment-index="3">Functional programming should <em>feel like mathematics</em>.</p>
+      </section>
+
+      <section>
+        <h2>Functional programming</h2>
+        <p>People like functional programming.</p>
+        <p class="fragment">Some languages are designed for it: Excel, Mathematica, Haskell</p>
+        <p class="fragment">How do these languages handle side effects?</p>
+        <ul>
+          <li class="fragment">Excel/Mathematica: Give up on being functional languages</li>
+          <li class="fragment">Haskell: Use monads!</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Introduction to Haskell</h2>
+        <p>Haskell uses mathematical notation for function definitions.</p>
+        <p>Function application does not require parentheses.</p>
+        <pre><code data-trim class="language-haskell">
+          f :: Int -> Int
+          f x = x + 1
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Introduction to Haskell</h2>
+        <p>Just like in math, Haskell makes it easy to compose functions.</p>
+        <pre><code data-trim class="language-haskell">
+          f :: Int -> Int
+          f x = x + 1
+
+          g :: Int -> Int
+          g x = x * 2
+
+          h :: Int -> Int
+          h = f . g
+        </code></pre>        
+      </section>
+
+      <section>
+        <h2>Introduction to Haskell</h2>
+        <p>There is a built-in identity function.</p>
+        <p>It works with all types.</p>
+        <p>In Haskell, we usually write <code class="tt">a</code>, <code class="tt">b</code>, etc. for generic types.</p>
+        <pre><code data-trim class="language-haskell">
+          id :: a -> a
+          id x = x
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Introduction to Haskell</h2>
+        <p>Haskell supports <em>pattern matching</em> in function definitions.</p>
+        <pre><code data-trim class="language-haskell">
+          fib :: Int -> Int
+          fib 0 = 0
+          fib 1 = 1
+          fib n = fib (n - 1) + fib (n - 2)
+        </code></pre>
+        <p>(This code is not perfectly safe, it enters an infinite loop for negative values of <code class="tt">n</code>.)</p>
+      </section>
+
+      <section>
+        <h2>Introduction to Haskell</h2>
+        <p>You can also define functions on multiple variables.</p>
+        <p>The type <code class="tt">Int -> Int -> Int</code> means <code class="tt">Int -> (Int -> Int)</code>.</p>
+        <pre><code data-trim class="language-haskell">
+          binom :: Int -> Int -> Int
+          binom n 0 = 1
+          binom n n = 1
+          binom n k = binom (n - 1) (k - 1) + binom (n - 1) k
+        </code></pre>
+        <p>In other words, after this definition, Haskell considers <code class="tt">binom n</code> to be a perfectly good function with type <code class="tt">Int -> Int</code>.</p>
+      </section>
+
+      <section>
+        <h2>Introduction to Haskell</h2>
+        <p>Pattern matching is especially powerful for <em>algebraic data types</em>.</p>
+        <pre><code data-trim class="language-haskell">
+          data Shape = Circle Float | Rectangle Float Float
+
+          area :: Shape -> Float
+          area (Circle r) = pi * r * r
+          area (Rectangle l w) = l * w
+        </code></pre>
+        <p class="fragment">In math, this is the type $\mathbb{R} + (\mathbb{R} \times \mathbb{R})$.</p>
+      </section>
+
+      <section>
+        <h2>Introduction to Haskell</h2>
+        <p>A <code class="tt">List</code> is a <em>recursive</em> algebraic data <em>type constructor</em>.</p>
+        <pre><code data-trim class="language-haskell">
+          data List a = Empty | Nonempty a (List a)
+
+          len :: List a -> Int
+          len Empty = 0
+          len (Nonempty x l) = 1 + len l
+        </code></pre>
+        <p class="fragment">In math, we write $L(a) = 1 + (a \times L(a))$.
+      </section>
+
+      <section>
+        <div class="vertical-center">
+          <p>What happens when you execute the following in Java?</p>
+          <pre><code data-trim class="language-java">
+            List&lt;Integer&gt; arr = new ArrayList&lt;Integer&gt;();
+            System.out.println(arr.get(0));
+          </code></pre>
+          <p class="answer fragment" data-fragment-index="1">Throws an <code class="tt">IndexOutOfBoundsException</code>.</p>
+          <pre class="fragment" data-fragment-index="2"><code data-trim class="language-java">
+            List&lt;Integer&gt; arr = new ArrayList&lt;Integer&gt;();
+            System.out.println(arr.indexOf(6));
+          </code></pre>
+          <p class="answer fragment" data-fragment-index="3">Prints <code class="tt">-1</code> (a sentinel value).</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>The <code class="tt">Maybe</code> type constructor</h2>
+        <p>(Also called <code class="tt">Optional</code> in other languages.)</p>
+        <pre><code data-trim class="language-haskell">
+          data Maybe a = Nothing | Just a
+
+          peek :: List a -> Maybe a
+          peek Empty = Nothing
+          peek (Nonempty x l) = Just x
+        </code></pre>
+        <p class="fragment">In other languages, we would likely have <code class="tt">peek :: List a -> a</code> and it would either throw an exception or return a sentinel value.</p>
+      </section>
+
+      <section>
+        <h2>The <code class="tt">Writer</code> type constructor</h2>
+        <p><code class="tt">Writer</code> allows you to collect text to print to the console.</p>
+        <pre><code data-trim class="language-haskell">
+          data Writer a = Writer a String
+
+          addone :: Int -> Writer Int
+          addone x = Writer (x + 1) "User added one. "
+        </code></pre>
+        <p>Although it seems trivial right now (just a fancy name for a tuple), it will become important later.</p>
+      </section>
+
+      <section>
+        <h2>The <code class="tt">IO</code> type constructor</h2>
+        <p>This built-in type constructor is used whenever the console is used to get input or display output.</p>
+        <p><code class="tt">IO a</code> means an I/O operation that returns a value of type <code class="tt">a</code>.</p>
+        <pre><code data-trim class="language-haskell">
+          putStrLn :: String -> IO ()
+          getLine :: IO String
+        </code></pre>
+        <p>Note that <code class="tt">getLine</code> is not a function!</p>
+      </section>
+
+      <section>
+        <h2>Type classes</h2>
+        <p>Usually, we define functions on types.</p>
+        <p>Sometimes, we want more general functions that work on all types, as long as they share certain functionality.</p>
+        <pre><code data-trim class="language-haskell">
+          class Show a where
+            show :: a -> String
+          
+          print :: Show a => a -> IO ()
+          print x = putStrLn (show x)
+        </code></pre>
+        </p>
+      </section>
+
+      <section>
+        <h2>Type classes</h2>
+        <pre><code data-trim class="language-haskell">
+          instance Show a => Show (List a) where
+            show Empty = ""
+            show (Nonempty x Empty) = show x
+            show (Nonempty x l) = show x ++ ", " ++ show l
+          
+          main :: IO ()
+          main = print (Nonempty 3 (Nonempty 8 Empty))
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Functors</h2>
+        <p>Formally, an (endo)functor is not just any type constructor, but one that is an instance of the <code class="tt">Functor</code> type class.</p>
+        <pre><code data-trim class="language-haskell">
+          class Functor F where
+            fmap :: (a -> b) -> F a -> F b
+        </code></pre>
+        <p>The meaning of <code class="tt">fmap f</code> is that it applies <code class="tt">f</code> to each element inside the container.</p>
+      </section>
+
+      <section>
+        <h2>Functors</h2>
+        <pre><code data-trim class="language-haskell">
+          instance Functor Maybe where
+            fmap f Nothing = Nothing
+            fmap f (Just x) = Just (f x)
+        </code></pre>
+        <pre class="fragment"><code data-trim class="language-haskell">
+          instance Functor Writer where
+            fmap f Writer x s = Writer (f x) s
+
+          instance Functor List where
+            fmap f Empty = Empty
+            fmap f (Nonempty x l) = Nonempty (f x) (fmap f l)
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Functors </h2>
+        <p>Some type constructors cannot be made into functors.</p>
+        <pre class="fragment" data-fragment-index="1"><code data-trim class="language-haskell">
+          data SelfFunc a = SelfFunc (a -> a)
+        </code></pre>
+        <p class="fragment" data-fragment-index="2">We would need <code class="tt">fmap :: (a -> b) -> SelfFunc a -> SelfFunc b</code>.</p> 
+        <p class="fragment" data-fragment-index="3">There is no way to take an <code class="tt">a -> a</code> and turn it into <code class="tt">b -> b</code> by applying <code class="tt">f :: a -> b</code> to it.</p>
+        <p class="fragment" data-fragment-index="4">Functors can be thought of as <em>containers</em>.</p>
+      </section>
+
+      <section>
+        <h2>Monads</h2>
+        <p>A monad is a functor that supports flattening, as previously stated. Formally,</p>
+        <pre><code data-trim class="language-haskell">
+          class Functor m => Monad m where
+            join :: m (m a) -> m a
+            return :: a -> m a
+        </code></pre>
+        <p>Haskell prefers the word <code class="tt">join</code> over <code class="tt">flatten</code>, but the meaning is the same. </p>
+        <p>Also, <code class="tt">return</code> simply wraps a value in a monad.</p>
+      </section>
+
+      <section>
+        <h2>Monads</h2>
+        <pre><code data-trim class="language-haskell">
+          instance Monad Maybe where
+            join (Just (Just x)) = Just x
+            return = Just
+        </code></pre>
+        <pre class="fragment"><code data-trim class="language-haskell">
+          instance Monad Writer where
+            join (Writer (Writer x s1) s2) = Writer x (s1 ++ s2)
+            return x = Writer x ""
+        </code></pre>
+      </section>
+
+      <section>
+        <h2><code class="tt">do</code> notation</h2>
+        <p>Haskell supplies syntactic sugar to automatically <code class="tt">join</code> after every monadic operation.</p>
+        <p>Suppose you have the following functions:</p>
+        <pre><code data-trim class="language-haskell">
+          f :: Int -> Writer Int
+          f x = Writer (x + 1) "Applied f. "
+
+          g :: Int -> Writer Int
+          g x = Writer (x * 2) "Applied g. "
+        </code></pre>
+      </section>
+
+      <section>
+        <h2><code class="tt">do</code> notation</h2>
+        <p>The following are equivalent:</p>
+        <pre><code data-trim class="language-haskell">
+          exampleDo :: Int -> Writer Int
+          exampleDo x = do
+            y1 <- f x 
+            y2 <- g y1 
+            return y2 
+        </code></pre>
+
+        <pre><code data-trim class="language-haskell">
+          exampleJoin :: Int -> Writer Int
+          exampleJoin x = join (fmap g (f x))
+        </code></pre>
+      </section>
+
+      <section>
+        <h2><code class="tt">do</code> notation</h2>
+        <p>More formally, Haskell expands a <code class="tt">do</code> block into <em>lamdba functions</em>.</p>
+        <pre><code data-trim class="language-haskell">
+          exampleLambda :: Int -> Writer Int
+          exampleDo = \x -> 
+            join (fmap \y1 -> 
+              join (fmap \y2 -> 
+                return y2 (g y1)
+              ) (f x)
+            )
+        </code></pre>
+        <p>This is similar to the idea of callback functions in JavaScript.</p>
+      </section>
+
+      <section>
+        <h2><code class="tt">do</code> notation in I/O</h2>
+        <p>Standard usage of the <code class="tt">IO</code> monad involves using <code class="tt">do</code> notation as follows.</p>
+        <pre><code data-trim class="language-haskell">
+          main :: IO ()
+          main = do
+            putStrLn "Enter name:"
+            name <- getLine
+            putStrLn ("Hello, " ++ name)
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Summary</h2>
+        <ul>
+          <li>Functors are containers.</li>
+          <li>Monads are functors that support flattening.</li>
+          <li>Flattening is a fancy way to chain operations, which help functional programming languages handle side effects.</li>
+        </ul>
+        <p class="fragment">Tomorrow: A more mathematical view, with more about categories!</p>
+      </section>
+      <!-- <section>
+        <h2>Overview</h2>
+        <p>Our main contribution is an equivalence:</p>
+        <p class="center"><strong>e-graphs $\leftrightarrow$ (cyclic) monotone circuits</strong></p>
+        <p class="fragment" data-fragment-index="1">This allows us to:</p> 
+        <ul>
+          <li class="fragment" data-fragment-index="1">Apply <strong>[KTX17]</strong> to efficiently solve extraction, parameterized by treewidth.</li> 
+          <li class="fragment" data-fragment-index="2">More easily <strong>simplify e-graphs</strong>, which significantly reduces treewidth.</li>
+        </ul>
+
+        <p class="fragment" data-fragment-index="3">The algorithm is very similar to <strong>[GLP24]</strong>, which you just saw.</p>
+
+        <table class="citations">
+          <tr class="fragment" data-fragment-index="1">
+            <td>[KTX17]</td>
+            <td>Iyad Kanj, Dimitrios M. Thilikos, and Ge Xia. <em>On the parameterized complexity of monotone and antimonotone weighted circuit satisfiability.</em></td>
+          </tr>
+          <tr class="fragment" data-fragment-index="3">
+            <td>[GLP24]</td>
+            <td>Amir Kafshdar Goharshady, Chun Kit Lam, and Lionel Parreaux. <em>Fast and Optimal Extraction for Sparse Equality Graphs.</em></td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Monotone circuits</h2>
+        <p>A <strong>monotone circuit</strong> is a circuit with only AND and OR gates.</p>
+        <div class="column pad-top-bottom">
+          <div class="fragment">
+            <p>e-node $\leftrightarrow$ all children true $\leftrightarrow$ AND</p>
+            <img width="766px" src="node-and.svg">
+          </div>
+          <div class="fragment">
+            <p>e-class $\leftrightarrow$ at least one child true $\leftrightarrow$ OR</p>
+            <img width="766px" src="class-or.svg">
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="column vertical-center">
+          <img width="383px" src="egraph-example.svg">
+          <p class="fragment" data-fragment-index="1">$\longrightarrow$</p> 
+          <img class="fragment" data-fragment-index="1" width="713px" src="egraph-converted.svg">
+        </div>
+      </section>
+
+      <section>
+        <h2>What about cycles?</h2>
+        <div class="column">
+          <div style="width: 800px; height: 550px; display: flex; flex-direction: column; align-items: center; justify-content: center">
+            <img class="fragment" data-fragment-index="1" width="524px" src="cyclic-circuit.svg">
+          </div>
+          <table class="fragment" data-fragment-index="2">
+            <tr class="fragment" data-fragment-index="2">
+              <th>$x$</th>
+              <th>old output</th>
+              <th class="left-double">new output</th>
+            </tr>
+            <tr class="fragment" data-fragment-index="3">
+              <td>0</td>
+              <td>0</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr class="fragment" data-fragment-index="4">
+              <td>0</td>
+              <td>1</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr class="fragment" data-fragment-index="5">
+              <td>1</td>
+              <td>0</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr class="fragment" data-fragment-index="6">
+              <td>1</td>
+              <td>1</td>
+              <td class="left-double">1</td>
+            </tr>
+          </table>
+        </div>
+        <p class="fragment">But e-graphs researchers never have to think about this. Why not?</p>
+
+      </section>
+      <section>
+        <h2>What about cycles?</h2>
+        <div class="column">
+          <div style="width: 800px; height: 550px; display: flex; flex-direction: column; align-items: center; justify-content: center">
+            <img width="744px" src="cyclic-circuit2.svg">
+          </div>
+          <table>
+            <tr>
+              <th>$x$</th>
+              <th>old output</th>
+              <th class="left-double">new output</th>
+            </tr>
+            <tr>
+              <td>0</td>
+              <td>0</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr>
+              <td>0</td>
+              <td>1</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>0</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>1</td>
+              <td class="left-double">1</td>
+            </tr>
+          </table>
+        </div>
+        <p>But e-graphs researchers never have to think about this. Why not?</p>
+      </section>
+      <section>
+        <h2>What about cycles?</h2>
+        <div class="column">
+          <div style="width: 800px; height: 550px; display: flex; flex-direction: column; align-items: center; justify-content: center">
+            <img width="744px" src="cyclic-circuit2.svg">
+            <img width="203px" src="tiny.svg">
+          </div>
+          <table>
+            <tr>
+              <th>$x$</th>
+              <th>old output</th>
+              <th class="left-double">new output</th>
+            </tr>
+            <tr>
+              <td>0</td>
+              <td>0</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr>
+              <td>0</td>
+              <td>1</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>0</td>
+              <td class="left-double">0</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>1</td>
+              <td class="left-double">1</td>
+            </tr>
+          </table>
+        </div>
+        <p>But e-graphs researchers never have to think about this. Why not?</p>
+        <div class="fixed">
+          <p class="fragment" style="top: 305px; left: 990px;">✅</p>
+          <p class="fragment" style="top: 554px; left: 990px;">✅</p>
+          <p class="fragment" style="top: 388px; left: 990px;">❌</p>
+          <p class="fragment" style="top: 471px; left: 990px;">❌</p>
+        </div>
+        <ul>
+          <li class="fragment">To find the minimum cost extraction, only need to consider  <strong>minimal</strong> solutions.</li>
+          <li class="fragment">For this particular circuit construction, every choice of minimally satisfying inputs (what to extract) has a unique way to set the rest of the circuit.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Converting to circuits</h2>
+        <p>To convert an e-graph $G$ to a circuit $C$:</p>
+        <ul>
+          <li>Replace every e-class with an OR gate.</li>
+          <li>Replace every e-node with an AND gate and a variable connected to it.</li>
+        </ul>
+        <div class="theorem fragment">
+          <p><b>Observation.</b> After this conversion from e-graph to circuit, there is a bijection</p>
+          <p class="center"><strong>minimal extractions</strong> of $G$ $\leftrightarrow$ <strong>minimal satisfying solutions</strong> of $C$.</p>
+          <p>This bijection preserves acyclicity.</p>
+          <p>(acyclic: extraction has no self-dependencies, circuit evaluation has no 1-cycles)</p>
+        </div>
+        <p class="fragment">$\implies$ Extraction is equivalent to <strong>weighted monotone circuit SAT</strong>!</p>
+      </section>
+      <section>
+        <h2>Minimum weight monotone circuit SAT</h2>
+        <p>[KTX17] already solved this, albeit stated only for circuits that do not have cycles.</p>
+        <p class="theorem"><b>Proposition 4.7 in [KTX17].</b> Let $C$ be a monotone circuit <strong>(with no cycles)</strong> and $G$ be the underlying undirected graph with $n$ nodes. If a tree decomposition for $G$ and treewidth $k$ is given, then a minimum weight satsifying assignment of $C$ can be computed in time $2^{O(k)}\text{poly}(n, k)$.</p>
+        <p class="fragment" data-fragment-index="1">The algorithm works unchanged for circuits with cycles, if we allow cyclic extraction!</p>
+        <ul class="fragment" data-fragment-index="1">
+          <li>Intuition: The undirected graph $G$ already "forgot" whether $C$ is a DAG.</li>
+        </ul>
+        <p class="fragment">For acyclic extraction, can maintain the transitive closure of the subgraph of 1-edges to make sure no 1-cycles are formed, achieving $2^{O(k^2)}\text{poly}(n, k)$.</p> 
+      </section>
+
+      <section>
+        <div class="column vertical-center">
+          <img width="713px" src="egraph-converted.svg">
+          <p class="fragment" data-fragment-index="1">$\longrightarrow$</p> 
+          <img class="fragment" data-fragment-index="1" width="701px" src="simplified.svg">
+        </div>
+      </section>
+
+      <section>
+        <h2>Circuit simplification</h2>
+        <p>E-graph simplification before extraction has been used with ILP (i.e. see <span class="mono">https://github.com/egraphs-good/extraction-gym/pull/16)</span></p>
+        <p class="fragment" data-fragment-index="1">With circuits, we can leverage <strong>existing circuit minimization tools that support sequential circuits</strong>*.</p>
+        <ul class="fragment">
+          <li>These preserve the whole $\{\text{input}\} \times \{\text{old state}\} \to \{\text{new state}\}$ table.</li>
+          <li>Takes care of simplifications like the previous slide.</li>
+        </ul>
+        <p class="fragment">But we only care about minimal satisfying solutions, sometimes acyclic.</p>
+        <ul>
+          <li class="fragment">Can write <strong>additional specialized rules</strong> to take advantage of this!</li>
+        </ul>
+        <table class="citations">
+          <tr class="fragment" data-fragment-index="1">
+            <td style="width: 0;">*</td>
+            <td>Need to restrict to the procedures that preserve monotonicity.</td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Custom simplification rules</h2>
+        <p>Because we are only interested in <strong>minimal</strong> extractions:</p>
+        <div class="column vertical-center">
+          <img class="fragment" data-fragment-index="1" width="701px" src="simplified.svg">
+          <p class="fragment" data-fragment-index="2">$\longrightarrow$</p> 
+          <img class="fragment" data-fragment-index="2" width="508px" src="simplified2.svg">
+        </div>
+      </section>
+
+      <section>
+        <h2>Custom simplification rules</h2>
+        <p>If we are only interested in <strong>acyclic extractions:</strong></p>
+        <div class="vertical-center">
+          <img class="fragment" width="1022px" src="remove-or-loop.svg">
+        </div>
+        <div class="fixed">
+          <p class="fragment" style="top: 585px; left: 1160px;">$1$</p>
+          <p class="fragment" style="top: 605px; left: 920px;">$1$</p>
+          <p class="fragment" style="top: 685px; left: 620px;">$1$</p>
+          <p class="fragment" style="top: 685px; left: 1430px;">$1$</p>
+        </div>
+      </section>
+      <section data-auto-animate>
+        <h2>Custom simplification rules</h2>
+        <p>If we are only interested in <strong>acyclic extractions:</strong></p>
+        <div class="vertical-center">
+          <img width="1022px" src="remove-or-loop.svg">
+        </div>
+        <div class="fixed">
+          <p style="top: 585px; left: 1160px;">$0$</p>
+          <p class="fragment" data-fragment-index="1" style="top: 350px; left: 980px; width: 800px;">delete this gate and all out-neighbors that are AND gates recursively</p>
+          <img class="fragment" data-fragment-index="1" width="164px" style="position: relative; top: 508px; left: 980px;" src="x.svg"> 
+        </div>
+      </section>
+      <section data-auto-animate>
+        <h2>Custom simplification rules</h2>
+        <p>If we are only interested in <strong>acyclic extractions:</strong></p>
+        <div class="vertical-center">
+          <img width="1022px" src="remove-or-loop.svg">
+          <p class="center">$\downarrow$</p> 
+          <img width="1022px" src="remove-or-loop2.svg">
+        </div>
+      </section>
+
+      <section>
+        <h2>Simplification results</h2>
+        <div class="column">
+          <div>
+            <p >We applied several ad-hoc rules like this to a test set of e-graphs used with egg. Depending on which applications the e-graphs came from, we observed:</p>
+            <ul>
+              <li>Up to 65% reduction in treewidth.</li>
+              <li>42-97% reduction in $|V|$.</li>
+              <li>57-96% reduction in $|E|$.</li>
+            </ul>
+            <p>A more systematic approach might improve this further.</p>
+          </div>
+          <img width="800px" src="eggcc-bril.png">
+          
+        </div>
+        
+      </section>
+
+      <section>
+        <h2>Open directions</h2>
+        <ul>
+          <li class="fragment">Can the treewidth-based extraction algorithm be adapted to support more general cost functions?</li>
+          <ul>
+            <li class="fragment">Cost of an e-node is often written as a function of the cost of children.</li>
+            <li class="fragment">Current algorithm (both [GLP24] and us) has no way to deal with the cost of a yet-unknown child.</li>
+          </ul>
+          <li class="fragment">How much simplification can you achieve if you actually adapted modern circuit simplification software that is used in practice?</li>
+          <li class="fragment">Can we find more applications of the connection between e-graphs and circuits?</li>
+        </ul>
+        <p class="fragment center pad-top-bottom">Thank you!</p>
+      </section> -->
+    </div>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.2/reveal.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.2/plugin/math/math.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.2/plugin/markdown/markdown.js"></script>
+  <script src="https://unpkg.com/reveal.js/plugin/highlight/highlight.js"></script>
+
+  <script>
+    Reveal.initialize({
+      controls: false,
+      controlsTutorial: false,
+      transition: 'fade',
+      plugins: [RevealMath.KaTeX, RevealMarkdown, RevealHighlight],
+      width: 1800,
+      height: 1080,
+      history: true,
+      slideNumber: true,
+      katex: {
+        macros: {
+          "\\pplus": "+\\!\\!+",
+        }
+      }
+      
+    });
+
+    Reveal.configure({ pdfSeparateFragments: false });
+
+  </script>
+
+</body>
+
+</html>
