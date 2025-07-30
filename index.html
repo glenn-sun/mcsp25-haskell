@@ -410,7 +410,7 @@
         <h2>Functors</h2>
         <pre><code data-trim class="language-haskell">
           instance Functor Writer where
-            fmap f Writer x s = Writer (f x) s
+            fmap f (Writer x s) = Writer (f x) s
         </code></pre>
         <pre class="fragment"><code data-trim class="language-haskell">
           instance Functor List where
@@ -418,17 +418,6 @@
             fmap f (Nonempty x l) = Nonempty (f x) (fmap f l)
         </code></pre>
       </section>
-
-      <!-- <section>
-        <h2>Functors </h2>
-        <p>Some type constructors cannot be reasonably made into functors.</p>
-        <pre class="fragment" data-fragment-index="1"><code data-trim class="language-haskell">
-          data SelfFunc a = SelfFunc (a -> a)
-        </code></pre>
-        <p class="fragment" data-fragment-index="2">We would need <code class="tt">fmap :: (a -> b) -> SelfFunc a -> SelfFunc b</code>.</p> 
-        <p class="fragment" data-fragment-index="3">There is no way to take an <code class="tt">a -> a</code> and turn it into <code class="tt">b -> b</code> by applying <code class="tt">f :: a -> b</code> to it.</p>
-        <p class="fragment" data-fragment-index="4">Functors can be thought of as <em>containers</em>.</p>
-      </section> -->
 
       <section>
         <h2>When <code class="tt">fmap</code> is not enough</h2>
@@ -600,7 +589,7 @@
         <p class="fragment" data-fragment-index="1">Haskell provides a <em>reverse fish</em> operator to make this more concise:</p>
         <pre class="fragment" data-fragment-index="1"><code data-trim class="language-haskell">
           (<=<) :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
-          (f <=< g) = join . fmap f . g 
+          f <=< g = join . fmap f . g 
           composed = f <=< g <=< h
         </code></pre>
       </section>
@@ -616,7 +605,7 @@
         <p>Then <code class="tt">f <=< g <=< h</code> is equivalent to:</p>
         <pre class="fragment"><code data-trim class="language-haskell">
           composed x = Writer (((x - 1) * 2) + 1) 
-                       "Applied h. Applied g. Applied f. "
+                       "Applied f. Applied g. Applied h. "
         </code></pre>
       </section>
 
@@ -708,7 +697,7 @@
 
       <section>
         <h2>Functor laws</h2>
-        <p>Our  <em>category</em> is called <code class="tt">*</code>, and we said that an (endo)functor is a type constructor <code class="tt">F :: * -> *</code> that supports <code class="tt">fmap</code>.</p>
+        <p>Our  <em>category</em> is called <code class="tt">*</code> (all types). We said that an (endo)functor is a type constructor <code class="tt">F :: * -> *</code> that supports <code class="tt">fmap</code>.</p>
 
         <p class="fragment" data-fragment-index="1">Formally, <code class="tt">fmap</code> must also satisfy the following:</p>
         <ul class="fragment" data-fragment-index="1">
@@ -719,68 +708,6 @@
         </ul>
         
       </section>
-<!-- 
-      <section>
-        <h2>Functor laws</h2>
-        <div class="center"><code class="tt">fmap (f . g) == fmap f . fmap g</code></div>
-        <div class="column">
-          <div class="fragment" data-fragment-index="1">
-            <span><code class="tt">fmap</code> 🤝 <code class="tt">(f . g)</code></span>
-            <span class="small-box">
-              <code class="tt">x</code>
-            </span>
-          </div>
-
-          <div class="divider fragment" data-fragment-index="2"></div>
-
-          <div class="fragment" data-fragment-index="2">
-            <span class="small-box">
-              <span><code class="tt">(f . g) x</code></span>
-            </span>
-          </div>
-
-          <div class="divider fragment" data-fragment-index="3"></div>
-
-          <div class="fragment" data-fragment-index="3">
-            <span class="small-box">
-              <span><code class="tt">f g x</code></span>
-            </span>
-          </div>
-        </div> 
-        <div class="column">
-          <div class="fragment" data-fragment-index="4">
-            <span><code class="tt">fmap</code> 🤝 <code class="tt">g</code></span>
-            <span class="small-box">
-              <code class="tt">x</code>
-            </span>
-          </div>
-
-          <div class="divider fragment" data-fragment-index="5"></div>
-
-          <div class="fragment" data-fragment-index="5">
-            <span class="small-box">
-              <span><code class="tt">g x</code></span>
-            </span>
-          </div>
-
-          <div class="divider fragment" data-fragment-index="6"></div>
-
-          <div class="fragment" data-fragment-index="6">
-            <span><code class="tt">fmap</code> 🤝 <code class="tt">f</code></span>
-            <span class="small-box">
-              <code class="tt">g x</code>
-            </span>
-          </div>
-
-          <div class="divider fragment" data-fragment-index="7"></div>
-
-          <div class="fragment" data-fragment-index="7">
-            <span class="small-box">
-              <span><code class="tt">f g x</code></span>
-            </span>
-          </div>
-        </div> 
-      </section> -->
 
       <section>
         <h2>Monad laws</h2>
@@ -1024,322 +951,6 @@
           <li>Monoids in the category of endofunctors is a correct but terrible definition.</li>
         </ul>
       </section>
-
-      <!-- <section>
-        <h2>Natural transformations</h2>
-        <p>Recall <code class="tt">peek :: List a -> Maybe a</code>.</p>
-
-        <p>A function between functors like <code class="tt">peek</code> is called a <em>natural transformation</em> if it satisfies for all <code class="tt"> f :: a -> b</code>:</p>
-        <ul>
-          <li><code class="tt">fmap f . peek == peek . fmap f</code></li>
-        </ul>
-        <p>In other words, <code class="tt">peek</code> can repackage, rearrange, delete, or duplicate data, but not change it.</p>
-        
-      </section>
-
-      <section>
-        <h2>Natural transformations</h2>
-        <p class="theorem"><strong>Theorem.</strong> (Wadler 1989) All functions <code class="tt">eta :: F a -> G a</code> definable in Haskell are natural transformations.</p></p>
-        <p>This is not true in math, because $\eta$ can condition on the type $a$.</p>
-        <p>Let $\eta$</p>
-      </section> -->
-      <!-- <section>
-        <h2>Overview</h2>
-        <p>Our main contribution is an equivalence:</p>
-        <p class="center"><strong>e-graphs $\leftrightarrow$ (cyclic) monotone circuits</strong></p>
-        <p class="fragment" data-fragment-index="1">This allows us to:</p> 
-        <ul>
-          <li class="fragment" data-fragment-index="1">Apply <strong>[KTX17]</strong> to efficiently solve extraction, parameterized by treewidth.</li> 
-          <li class="fragment" data-fragment-index="2">More easily <strong>simplify e-graphs</strong>, which significantly reduces treewidth.</li>
-        </ul>
-
-        <p class="fragment" data-fragment-index="3">The algorithm is very similar to <strong>[GLP24]</strong>, which you just saw.</p>
-
-        <table class="citations">
-          <tr class="fragment" data-fragment-index="1">
-            <td>[KTX17]</td>
-            <td>Iyad Kanj, Dimitrios M. Thilikos, and Ge Xia. <em>On the parameterized complexity of monotone and antimonotone weighted circuit satisfiability.</em></td>
-          </tr>
-          <tr class="fragment" data-fragment-index="3">
-            <td>[GLP24]</td>
-            <td>Amir Kafshdar Goharshady, Chun Kit Lam, and Lionel Parreaux. <em>Fast and Optimal Extraction for Sparse Equality Graphs.</em></td>
-          </tr>
-        </table>
-      </section>
-
-      <section>
-        <h2>Monotone circuits</h2>
-        <p>A <strong>monotone circuit</strong> is a circuit with only AND and OR gates.</p>
-        <div class="column pad-top-bottom">
-          <div class="fragment">
-            <p>e-node $\leftrightarrow$ all children true $\leftrightarrow$ AND</p>
-            <img width="766px" src="node-and.svg">
-          </div>
-          <div class="fragment">
-            <p>e-class $\leftrightarrow$ at least one child true $\leftrightarrow$ OR</p>
-            <img width="766px" src="class-or.svg">
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="column vertical-center">
-          <img width="383px" src="egraph-example.svg">
-          <p class="fragment" data-fragment-index="1">$\longrightarrow$</p> 
-          <img class="fragment" data-fragment-index="1" width="713px" src="egraph-converted.svg">
-        </div>
-      </section>
-
-      <section>
-        <h2>What about cycles?</h2>
-        <div class="column">
-          <div style="width: 800px; height: 550px; display: flex; flex-direction: column; align-items: center; justify-content: center">
-            <img class="fragment" data-fragment-index="1" width="524px" src="cyclic-circuit.svg">
-          </div>
-          <table class="fragment" data-fragment-index="2">
-            <tr class="fragment" data-fragment-index="2">
-              <th>$x$</th>
-              <th>old output</th>
-              <th class="left-double">new output</th>
-            </tr>
-            <tr class="fragment" data-fragment-index="3">
-              <td>0</td>
-              <td>0</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr class="fragment" data-fragment-index="4">
-              <td>0</td>
-              <td>1</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr class="fragment" data-fragment-index="5">
-              <td>1</td>
-              <td>0</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr class="fragment" data-fragment-index="6">
-              <td>1</td>
-              <td>1</td>
-              <td class="left-double">1</td>
-            </tr>
-          </table>
-        </div>
-        <p class="fragment">But e-graphs researchers never have to think about this. Why not?</p>
-
-      </section>
-      <section>
-        <h2>What about cycles?</h2>
-        <div class="column">
-          <div style="width: 800px; height: 550px; display: flex; flex-direction: column; align-items: center; justify-content: center">
-            <img width="744px" src="cyclic-circuit2.svg">
-          </div>
-          <table>
-            <tr>
-              <th>$x$</th>
-              <th>old output</th>
-              <th class="left-double">new output</th>
-            </tr>
-            <tr>
-              <td>0</td>
-              <td>0</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr>
-              <td>0</td>
-              <td>1</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>0</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>1</td>
-              <td class="left-double">1</td>
-            </tr>
-          </table>
-        </div>
-        <p>But e-graphs researchers never have to think about this. Why not?</p>
-      </section>
-      <section>
-        <h2>What about cycles?</h2>
-        <div class="column">
-          <div style="width: 800px; height: 550px; display: flex; flex-direction: column; align-items: center; justify-content: center">
-            <img width="744px" src="cyclic-circuit2.svg">
-            <img width="203px" src="tiny.svg">
-          </div>
-          <table>
-            <tr>
-              <th>$x$</th>
-              <th>old output</th>
-              <th class="left-double">new output</th>
-            </tr>
-            <tr>
-              <td>0</td>
-              <td>0</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr>
-              <td>0</td>
-              <td>1</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>0</td>
-              <td class="left-double">0</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>1</td>
-              <td class="left-double">1</td>
-            </tr>
-          </table>
-        </div>
-        <p>But e-graphs researchers never have to think about this. Why not?</p>
-        <div class="fixed">
-          <p class="fragment" style="top: 305px; left: 990px;">✅</p>
-          <p class="fragment" style="top: 554px; left: 990px;">✅</p>
-          <p class="fragment" style="top: 388px; left: 990px;">❌</p>
-          <p class="fragment" style="top: 471px; left: 990px;">❌</p>
-        </div>
-        <ul>
-          <li class="fragment">To find the minimum cost extraction, only need to consider  <strong>minimal</strong> solutions.</li>
-          <li class="fragment">For this particular circuit construction, every choice of minimally satisfying inputs (what to extract) has a unique way to set the rest of the circuit.</li>
-        </ul>
-      </section>
-      <section>
-        <h2>Converting to circuits</h2>
-        <p>To convert an e-graph $G$ to a circuit $C$:</p>
-        <ul>
-          <li>Replace every e-class with an OR gate.</li>
-          <li>Replace every e-node with an AND gate and a variable connected to it.</li>
-        </ul>
-        <div class="theorem fragment">
-          <p><b>Observation.</b> After this conversion from e-graph to circuit, there is a bijection</p>
-          <p class="center"><strong>minimal extractions</strong> of $G$ $\leftrightarrow$ <strong>minimal satisfying solutions</strong> of $C$.</p>
-          <p>This bijection preserves acyclicity.</p>
-          <p>(acyclic: extraction has no self-dependencies, circuit evaluation has no 1-cycles)</p>
-        </div>
-        <p class="fragment">$\implies$ Extraction is equivalent to <strong>weighted monotone circuit SAT</strong>!</p>
-      </section>
-      <section>
-        <h2>Minimum weight monotone circuit SAT</h2>
-        <p>[KTX17] already solved this, albeit stated only for circuits that do not have cycles.</p>
-        <p class="theorem"><b>Proposition 4.7 in [KTX17].</b> Let $C$ be a monotone circuit <strong>(with no cycles)</strong> and $G$ be the underlying undirected graph with $n$ nodes. If a tree decomposition for $G$ and treewidth $k$ is given, then a minimum weight satsifying assignment of $C$ can be computed in time $2^{O(k)}\text{poly}(n, k)$.</p>
-        <p class="fragment" data-fragment-index="1">The algorithm works unchanged for circuits with cycles, if we allow cyclic extraction!</p>
-        <ul class="fragment" data-fragment-index="1">
-          <li>Intuition: The undirected graph $G$ already "forgot" whether $C$ is a DAG.</li>
-        </ul>
-        <p class="fragment">For acyclic extraction, can maintain the transitive closure of the subgraph of 1-edges to make sure no 1-cycles are formed, achieving $2^{O(k^2)}\text{poly}(n, k)$.</p> 
-      </section>
-
-      <section>
-        <div class="column vertical-center">
-          <img width="713px" src="egraph-converted.svg">
-          <p class="fragment" data-fragment-index="1">$\longrightarrow$</p> 
-          <img class="fragment" data-fragment-index="1" width="701px" src="simplified.svg">
-        </div>
-      </section>
-
-      <section>
-        <h2>Circuit simplification</h2>
-        <p>E-graph simplification before extraction has been used with ILP (i.e. see <span class="mono">https://github.com/egraphs-good/extraction-gym/pull/16)</span></p>
-        <p class="fragment" data-fragment-index="1">With circuits, we can leverage <strong>existing circuit minimization tools that support sequential circuits</strong>*.</p>
-        <ul class="fragment">
-          <li>These preserve the whole $\{\text{input}\} \times \{\text{old state}\} \to \{\text{new state}\}$ table.</li>
-          <li>Takes care of simplifications like the previous slide.</li>
-        </ul>
-        <p class="fragment">But we only care about minimal satisfying solutions, sometimes acyclic.</p>
-        <ul>
-          <li class="fragment">Can write <strong>additional specialized rules</strong> to take advantage of this!</li>
-        </ul>
-        <table class="citations">
-          <tr class="fragment" data-fragment-index="1">
-            <td style="width: 0;">*</td>
-            <td>Need to restrict to the procedures that preserve monotonicity.</td>
-          </tr>
-        </table>
-      </section>
-
-      <section>
-        <h2>Custom simplification rules</h2>
-        <p>Because we are only interested in <strong>minimal</strong> extractions:</p>
-        <div class="column vertical-center">
-          <img class="fragment" data-fragment-index="1" width="701px" src="simplified.svg">
-          <p class="fragment" data-fragment-index="2">$\longrightarrow$</p> 
-          <img class="fragment" data-fragment-index="2" width="508px" src="simplified2.svg">
-        </div>
-      </section>
-
-      <section>
-        <h2>Custom simplification rules</h2>
-        <p>If we are only interested in <strong>acyclic extractions:</strong></p>
-        <div class="vertical-center">
-          <img class="fragment" width="1022px" src="remove-or-loop.svg">
-        </div>
-        <div class="fixed">
-          <p class="fragment" style="top: 585px; left: 1160px;">$1$</p>
-          <p class="fragment" style="top: 605px; left: 920px;">$1$</p>
-          <p class="fragment" style="top: 685px; left: 620px;">$1$</p>
-          <p class="fragment" style="top: 685px; left: 1430px;">$1$</p>
-        </div>
-      </section>
-      <section data-auto-animate>
-        <h2>Custom simplification rules</h2>
-        <p>If we are only interested in <strong>acyclic extractions:</strong></p>
-        <div class="vertical-center">
-          <img width="1022px" src="remove-or-loop.svg">
-        </div>
-        <div class="fixed">
-          <p style="top: 585px; left: 1160px;">$0$</p>
-          <p class="fragment" data-fragment-index="1" style="top: 350px; left: 980px; width: 800px;">delete this gate and all out-neighbors that are AND gates recursively</p>
-          <img class="fragment" data-fragment-index="1" width="164px" style="position: relative; top: 508px; left: 980px;" src="x.svg"> 
-        </div>
-      </section>
-      <section data-auto-animate>
-        <h2>Custom simplification rules</h2>
-        <p>If we are only interested in <strong>acyclic extractions:</strong></p>
-        <div class="vertical-center">
-          <img width="1022px" src="remove-or-loop.svg">
-          <p class="center">$\downarrow$</p> 
-          <img width="1022px" src="remove-or-loop2.svg">
-        </div>
-      </section>
-
-      <section>
-        <h2>Simplification results</h2>
-        <div class="column">
-          <div>
-            <p >We applied several ad-hoc rules like this to a test set of e-graphs used with egg. Depending on which applications the e-graphs came from, we observed:</p>
-            <ul>
-              <li>Up to 65% reduction in treewidth.</li>
-              <li>42-97% reduction in $|V|$.</li>
-              <li>57-96% reduction in $|E|$.</li>
-            </ul>
-            <p>A more systematic approach might improve this further.</p>
-          </div>
-          <img width="800px" src="eggcc-bril.png">
-          
-        </div>
-        
-      </section>
-
-      <section>
-        <h2>Open directions</h2>
-        <ul>
-          <li class="fragment">Can the treewidth-based extraction algorithm be adapted to support more general cost functions?</li>
-          <ul>
-            <li class="fragment">Cost of an e-node is often written as a function of the cost of children.</li>
-            <li class="fragment">Current algorithm (both [GLP24] and us) has no way to deal with the cost of a yet-unknown child.</li>
-          </ul>
-          <li class="fragment">How much simplification can you achieve if you actually adapted modern circuit simplification software that is used in practice?</li>
-          <li class="fragment">Can we find more applications of the connection between e-graphs and circuits?</li>
-        </ul>
-        <p class="fragment center pad-top-bottom">Thank you!</p>
-      </section> -->
     </div>
 
   </div>
