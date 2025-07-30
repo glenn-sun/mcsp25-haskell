@@ -491,6 +491,7 @@
         <pre><code data-trim class="language-haskell">
           instance Monad Maybe where
             join (Just (Just x)) = Just x
+            -- Nothing cases omitted
             return x = Just x
         </code></pre>
 
