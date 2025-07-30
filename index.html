@@ -21,7 +21,6 @@
       <section>
         <div class="vertical-center">
           <h1>Monads, Categories, and<br>the Structure of Programming</h1>
-          <p class="subhead">Day 1: Monads and Functional Programming</p>
           <p class="center"><br>Mathcamp 2025</p>
           <p class="center">Glenn Sun</p>
         </div>
@@ -131,14 +130,14 @@
       <section>
         <h2>Concatenation of type constructors</h2>
         <p>Concatenation of lists has type signature: $$\pplus : \texttt{List&lt;T&gt;} \times \texttt{List&lt;T&gt;} \to \texttt{List&lt;T&gt;}$$ </p>
-        <p>Concatanation of the <em>type constructor</em> <code class="tt">List</code> has type signature: $$\pplus : \texttt{List&lt;List&lt;T&gt;&gt;}\to \texttt{List&lt;T&gt;} $$</p>
+        <p>Concatenation of the <em>type constructor</em> <code class="tt">List</code> has type signature: $$\pplus : \texttt{List&lt;List&lt;T&gt;&gt;}\to \texttt{List&lt;T&gt;} $$</p>
         <p>This is flattening!</p>
       </section>
 
       <section>
         <h2>Outline</h2>
-        <p>Today: What are monads and why are they useful?</p>
-        <p>Tomorrow: More about categories and monoids</p>
+        <p>Up next: What are monads and why are they useful?</p>
+        <p>Later: More about categories and monoids</p>
       </section>
 
       <section>
@@ -251,12 +250,11 @@
         <p>You can also define functions on multiple variables.</p>
         <p>The type <code class="tt">Int -> Int -> Int</code> means <code class="tt">Int -> (Int -> Int)</code>.</p>
         <pre><code data-trim class="language-haskell">
-          binom :: Int -> Int -> Int
-          binom n 0 = 1
-          binom n n = 1
-          binom n k = binom (n - 1) (k - 1) + binom (n - 1) k
+          gcd :: Int -> Int -> Int
+          gcd n 0 = n
+          gcd n m = gcd m (n `mod` m)
         </code></pre>
-        <p>In other words, after this definition, Haskell considers <code class="tt">binom n</code> to be a perfectly good function with type <code class="tt">Int -> Int</code>.</p>
+        <p>In other words, after this definition, Haskell considers <code class="tt">gcd n</code> to be a perfectly good function with type <code class="tt">Int -> Int</code>.</p>
       </section>
 
       <section>
@@ -338,9 +336,23 @@
       </section>
 
       <section>
+        <h2>Where we are</h2>
+        <p>We learned about the type constructors:</p>
+        <ul>
+          <li><code class="tt">List</code></li>
+          <li><code class="tt">Maybe</code></li>
+          <li><code class="tt">Writer</code></li>
+          <li><code class="tt">IO</code></li>
+        </ul>
+        <p>Secretly, these are all monads! That means we need to show how they <em>implement flattening</em>.</p>
+        <p>Next up: Different types that implement the same functions.</p>
+      </section>
+
+      <section>
         <h2>Type classes</h2>
-        <p>Usually, we define functions on types.</p>
-        <p>Sometimes, we want more general functions that work on all types, as long as they share certain functionality.</p>
+        <p>Type classes outline functionality that many types should share.</p>
+
+        <p>Eventually, we'll define the <code class="tt">Monad</code> type class.</p>
         <pre><code data-trim class="language-haskell">
           class Show a where
             show :: a -> String
@@ -353,6 +365,7 @@
 
       <section>
         <h2>Type classes</h2>
+        <p>We can implement the functions in a type class for various types.</p>
         <pre><code data-trim class="language-haskell">
           instance Show a => Show (List a) where
             show Empty = ""
@@ -366,7 +379,8 @@
 
       <section>
         <h2>Functors</h2>
-        <p>Formally, an (endo)functor is not just any type constructor, but one that is an instance of the <code class="tt">Functor</code> type class.</p>
+        <p>We defined earlier that endofunctors are just type constructors.</p>
+        <p>Formally, an (endo)functor must also be an instance of the <code class="tt">Functor</code> type class.</p>
         <pre><code data-trim class="language-haskell">
           class Functor F where
             fmap :: (a -> b) -> F a -> F b
@@ -381,119 +395,654 @@
             fmap f Nothing = Nothing
             fmap f (Just x) = Just (f x)
         </code></pre>
-        <pre class="fragment"><code data-trim class="language-haskell">
+        <div class="column">
+          <div class="fragment" data-fragment-index="1"><span><code class="tt">f</code> ❤️ <code class="tt">x</code></span></div>
+          <div class="divider fragment" data-fragment-index="2"></div>
+          <div class="fragment" data-fragment-index="2"><span><code class="tt">f</code> 😢</span><span class="small-box"><code class="tt">x</code></span></div>
+          <div class="divider fragment" data-fragment-index="3"></div>
+          <div class="fragment" data-fragment-index="3"><span><code class="tt">fmap</code> 🤝 <code class="tt">f</code></span><span class="small-box"><code class="tt">x</code></span></div>
+          <div class="divider fragment" data-fragment-index="4"></div>
+          <div class="fragment" data-fragment-index="4"><span class="small-box"><span><code class="tt">f</code> ❤️ <code class="tt">x</code></span></span></div>
+        </div> 
+      </section>
+
+      <section>
+        <h2>Functors</h2>
+        <pre><code data-trim class="language-haskell">
           instance Functor Writer where
             fmap f Writer x s = Writer (f x) s
-
+        </code></pre>
+        <pre class="fragment"><code data-trim class="language-haskell">
           instance Functor List where
             fmap f Empty = Empty
             fmap f (Nonempty x l) = Nonempty (f x) (fmap f l)
         </code></pre>
       </section>
 
-      <section>
+      <!-- <section>
         <h2>Functors </h2>
-        <p>Some type constructors cannot be made into functors.</p>
+        <p>Some type constructors cannot be reasonably made into functors.</p>
         <pre class="fragment" data-fragment-index="1"><code data-trim class="language-haskell">
           data SelfFunc a = SelfFunc (a -> a)
         </code></pre>
         <p class="fragment" data-fragment-index="2">We would need <code class="tt">fmap :: (a -> b) -> SelfFunc a -> SelfFunc b</code>.</p> 
         <p class="fragment" data-fragment-index="3">There is no way to take an <code class="tt">a -> a</code> and turn it into <code class="tt">b -> b</code> by applying <code class="tt">f :: a -> b</code> to it.</p>
         <p class="fragment" data-fragment-index="4">Functors can be thought of as <em>containers</em>.</p>
+      </section> -->
+
+      <section>
+        <h2>When <code class="tt">fmap</code> is not enough</h2>
+        <p>Imagine that <code class="tt">f</code> wants to change <code class="tt">x</code> into <code class="tt">y</code> and put it in a box, but <code class="tt">x</code> is already in 2 boxes. One option is:</p> 
+        <div class="column overlap">
+          <div class="fragment fade-in-then-out" data-fragment-index="1">
+            <span><code class="tt">f</code> 😭</span>
+            <span class="big-box"><span class="box">
+              <code class="tt">x</code>
+            </span></span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="2">
+            <span><code class="tt">fmap</code> 🤝 <code class="tt">f</code></span>
+            <span class="big-box"><span class="box">
+              <code class="tt">x</code>
+            </span></span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="3">
+            <span class="big-box">
+              <span><code class="tt">f</code> 😢</span> 
+              <span class="box">
+                <code class="tt">x</code>
+              </span>
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="4">
+            <span class="big-box">
+              <span><code class="tt">fmap</code> 🤝 <code class="tt">f</code></span> 
+              <span class="box">
+                <code class="tt">x</code>
+              </span>
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="5">
+            <span class="big-box"><span class="box">
+              <code class="tt">f</code> 😈 <code class="tt">x</code>
+            </span></span>
+          </div>
+
+          <div class="fragment fade-in" data-fragment-index="6">
+            <span class="big-box">
+              <span class="box">
+                <span class="small-box">
+                  <code class="tt">y</code>
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <p class="fragment" data-fragment-index="7">But the next time, <code class="tt">f</code> will have to get help from <code class="tt">fmap</code> 3 times!</p>
       </section>
 
       <section>
         <h2>Monads</h2>
-        <p>A monad is a functor that supports flattening, as previously stated. Formally,</p>
+        <p>A monad is a functor that also supports flattening. Formally,</p>
         <pre><code data-trim class="language-haskell">
           class Functor m => Monad m where
             join :: m (m a) -> m a
             return :: a -> m a
         </code></pre>
         <p>Haskell prefers the word <code class="tt">join</code> over <code class="tt">flatten</code>, but the meaning is the same. </p>
-        <p>Also, <code class="tt">return</code> simply wraps a value in a monad.</p>
+        <p>The function <code class="tt">return</code> is less important, it just puts a value into the container.</p>
       </section>
 
       <section>
-        <h2>Monads</h2>
+        <h2>The <code class="tt">Maybe</code> monad</h2>
         <pre><code data-trim class="language-haskell">
           instance Monad Maybe where
             join (Just (Just x)) = Just x
-            return = Just
+            return x = Just x
         </code></pre>
-        <pre class="fragment"><code data-trim class="language-haskell">
+
+        <div class="column overlap">
+          <div class="fragment fade-in-then-out" data-fragment-index="1">
+            <span><code class="tt">f</code> 😭</span>
+            <span class="big-box"><span class="box">
+              <code class="tt">x</code>
+            </span></span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="2">
+            <span><code class="tt">join</code> ✨</span>
+            <span class="big-box"><span class="box">
+              <code class="tt">x</code>
+            </span></span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="3">
+            <span class="box">
+              <code class="tt">x</code>
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="4">
+            <span><code class="tt">fmap</code> 🤝 <code class="tt">f</code></span> 
+            <span class="box">
+              <code class="tt">x</code>
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="5">
+            <span class="box">
+              <code class="tt">f</code> 😈 <code class="tt">x</code>
+            </span>
+          </div>
+
+          <div class="fragment fade-in" data-fragment-index="6">
+            <span class="box"><span class="small-box">
+              <code class="tt">y</code> 
+            </span></span>
+          </div>
+        </div>
+
+        <p class="fragment" data-fragment-index="7">In code, we can now do <code class="tt">fmap f . join</code>.</p>
+      </section>
+
+
+      <section>
+        <h2>The <code class="tt">Writer</code> monad</h2>
+        <pre><code data-trim class="language-haskell">
           instance Monad Writer where
             join (Writer (Writer x s1) s2) = Writer x (s1 ++ s2)
             return x = Writer x ""
         </code></pre>
+        <div class="column">
+          <div class="fragment" data-fragment-index="1">
+            <span><code class="tt">join</code> ✨</span>
+            <span class="box"><span class="small-box">
+              <code class="tt">x</code> 📕
+            </span>📗</span>
+          </div>
+
+          <div class="divider fragment" data-fragment-index="2"></div>
+
+          <div class="fragment" data-fragment-index="2">
+            <span class="small-box">
+              <code class="tt">x</code> 📕 📗
+            </span>
+          </div>
+        </div>
       </section>
 
       <section>
-        <h2><code class="tt">do</code> notation</h2>
-        <p>Haskell supplies syntactic sugar to automatically <code class="tt">join</code> after every monadic operation.</p>
-        <p>Suppose you have the following functions:</p>
+        <h2>The <code class="tt">Writer</code> monad</h2>
         <pre><code data-trim class="language-haskell">
           f :: Int -> Writer Int
           f x = Writer (x + 1) "Applied f. "
 
           g :: Int -> Writer Int
           g x = Writer (x * 2) "Applied g. "
+
+          h :: Int -> Writer Int
+          h x = Writer (x - 1) "Applied h. "
+        </code></pre>
+        <p>We want the "composition" <code class="tt">f . g . h</code>, but that is not possible.</p>
+      </section>
+
+      <section>
+        <h2>The <code class="tt">Writer</code> monad</h2>
+        <p>Instead, we can use <code class="tt">fmap</code> and <code class="tt">join</code>!</p>
+        <pre><code data-trim class="language-haskell">
+          composed :: Int -> Writer Int
+          composed = join . fmap f . join . fmap g . h
+        </code></pre>
+        <p class="fragment" data-fragment-index="1">Haskell provides a <em>reverse fish</em> operator to make this more concise:</p>
+        <pre class="fragment" data-fragment-index="1"><code data-trim class="language-haskell">
+          (<=<) :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
+          (f <=< g) = join . fmap f . g 
+          composed = f <=< g <=< h
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>The <code class="tt">Writer</code> monad</h2>
+        <p>Reverse fish composition fulfills the same need as standard composition with side effects, but remains pure. Recall that:</p>
+        <pre><code data-trim class="language-haskell">
+          f x = Writer (x + 1) "Applied f. "
+          g x = Writer (x * 2) "Applied g. "
+          h x = Writer (x - 1) "Applied h. "
+        </code></pre>
+        <p>Then <code class="tt">f <=< g <=< h</code> is equivalent to:</p>
+        <pre class="fragment"><code data-trim class="language-haskell">
+          composed x = Writer (((x - 1) * 2) + 1) 
+                       "Applied h. Applied g. Applied f. "
         </code></pre>
       </section>
 
       <section>
         <h2><code class="tt">do</code> notation</h2>
-        <p>The following are equivalent:</p>
+        <p>Another way to use monads in Haskell is <code class="tt">do</code> notation.</p>
         <pre><code data-trim class="language-haskell">
-          exampleDo :: Int -> Writer Int
-          exampleDo x = do
-            y1 <- f x 
+          composed :: Int -> Writer Int
+          composed x = do
+            y1 <- h x 
             y2 <- g y1 
-            return y2 
+            y3 <- f y2
+            return y3 
         </code></pre>
+        <p>Superficially, it now looks a lot like other languages!</p>
+      </section>
+
+      <section>
+        <h2><code class="tt">do</code> notation</h2>
+        <p>To explain <code class="tt">do</code> notation, you will will first need to understand <em>lambda functions</em>.</p>
+
+        <p>A lambda function is just an unnamed function. It has the following syntax:</p>
 
         <pre><code data-trim class="language-haskell">
-          exampleJoin :: Int -> Writer Int
-          exampleJoin x = join (fmap g (f x))
+          squareAll :: List Int -> List Int
+          squareAll list = fmap (\x -> x * x) list
         </code></pre>
       </section>
 
       <section>
         <h2><code class="tt">do</code> notation</h2>
-        <p>More formally, Haskell expands a <code class="tt">do</code> block into <em>lamdba functions</em>.</p>
+        <p>Let <code class="tt">f :: a -> m a</code> for some <code class="tt">Monad m</code> and type <code class="tt">a</code>. Then,</p>
         <pre><code data-trim class="language-haskell">
-          exampleLambda :: Int -> Writer Int
-          exampleDo = \x -> 
-            join (fmap \y1 -> 
-              join (fmap \y2 -> 
-                return y2 (g y1)
-              ) (f x)
-            )
+          g x = do
+            y <- f x
+            ...
         </code></pre>
-        <p>This is similar to the idea of callback functions in JavaScript.</p>
+        <p>is defined to mean:</p>
+        <pre><code data-trim class="language-haskell">
+          g = ((\y -> ...) <=< f)
+        </code></pre>
+      </section>
+
+      <section>
+        <h2><code class="tt">do</code> notation</h2>
+        <pre><code data-trim class="language-haskell">
+          h x = do
+            y <- f x
+            z <- g y
+            return z
+        </code></pre>
+        <pre><code data-trim class="language-haskell">
+          h = (\y -> ((\z -> return z) <=< g) y) <=< f
+            = (\y -> (return <=< g) y) <=< f
+            = return <=< g <=< f
+            = g <=< f
+        </code></pre>
       </section>
 
       <section>
         <h2><code class="tt">do</code> notation in I/O</h2>
-        <p>Standard usage of the <code class="tt">IO</code> monad involves using <code class="tt">do</code> notation as follows.</p>
         <pre><code data-trim class="language-haskell">
-          main :: IO ()
           main = do
-            putStrLn "Enter name:"
+            print "Enter name:"
             name <- getLine
-            putStrLn ("Hello, " ++ name)
+            print ("Hello, " ++ name)
+        </code></pre>
+
+        <pre><code data-trim class="language-haskell">
+          main = ((\_ -> (
+                    (\name -> 
+                      print ("Hello, " ++ name)
+                    ) <=< (\_ -> getLine)) ()
+                  ) <=< (\_ -> print "Enter name:")) ()
         </code></pre>
       </section>
 
       <section>
-        <h2>Summary</h2>
+        <h2>Where we are</h2>
+        <p>We learned about functors and monads.</p>
         <ul>
-          <li>Functors are containers.</li>
-          <li>Monads are functors that support flattening.</li>
-          <li>Flattening is a fancy way to chain operations, which help functional programming languages handle side effects.</li>
+          <li><code class="tt">fmap</code> helps functions jump into containers</li>
+          <li><code class="tt">join</code> flattens out nested containers</li>
+          <li>Monads capture side effects</li>
+          <li><code class="tt"><=<</code> and <code class="tt">do</code> make it easy to compose monadic functions</li>
         </ul>
-        <p class="fragment">Tomorrow: A more mathematical view, with more about categories!</p>
+        <p class="fragment">Next up: categories and monoids</p>
       </section>
+
+      <section>
+        <h2>Functor laws</h2>
+        <p>Our  <em>category</em> is called <code class="tt">*</code>, and we said that an (endo)functor is a type constructor <code class="tt">F :: * -> *</code> that supports <code class="tt">fmap</code>.</p>
+
+        <p class="fragment" data-fragment-index="1">Formally, <code class="tt">fmap</code> must also satisfy the following:</p>
+        <ul class="fragment" data-fragment-index="1">
+          <li>Identity law: </li>
+          <div class="center"><code class="tt">fmap id == id</code></div>
+          <li>Composition law: If <code class="tt">h == f . g</code>, then</li>
+          <div class="center"> <code class="tt">fmap h == fmap f . fmap g</code></div>
+        </ul>
+        
+      </section>
+<!-- 
+      <section>
+        <h2>Functor laws</h2>
+        <div class="center"><code class="tt">fmap (f . g) == fmap f . fmap g</code></div>
+        <div class="column">
+          <div class="fragment" data-fragment-index="1">
+            <span><code class="tt">fmap</code> 🤝 <code class="tt">(f . g)</code></span>
+            <span class="small-box">
+              <code class="tt">x</code>
+            </span>
+          </div>
+
+          <div class="divider fragment" data-fragment-index="2"></div>
+
+          <div class="fragment" data-fragment-index="2">
+            <span class="small-box">
+              <span><code class="tt">(f . g) x</code></span>
+            </span>
+          </div>
+
+          <div class="divider fragment" data-fragment-index="3"></div>
+
+          <div class="fragment" data-fragment-index="3">
+            <span class="small-box">
+              <span><code class="tt">f g x</code></span>
+            </span>
+          </div>
+        </div> 
+        <div class="column">
+          <div class="fragment" data-fragment-index="4">
+            <span><code class="tt">fmap</code> 🤝 <code class="tt">g</code></span>
+            <span class="small-box">
+              <code class="tt">x</code>
+            </span>
+          </div>
+
+          <div class="divider fragment" data-fragment-index="5"></div>
+
+          <div class="fragment" data-fragment-index="5">
+            <span class="small-box">
+              <span><code class="tt">g x</code></span>
+            </span>
+          </div>
+
+          <div class="divider fragment" data-fragment-index="6"></div>
+
+          <div class="fragment" data-fragment-index="6">
+            <span><code class="tt">fmap</code> 🤝 <code class="tt">f</code></span>
+            <span class="small-box">
+              <code class="tt">g x</code>
+            </span>
+          </div>
+
+          <div class="divider fragment" data-fragment-index="7"></div>
+
+          <div class="fragment" data-fragment-index="7">
+            <span class="small-box">
+              <span><code class="tt">f g x</code></span>
+            </span>
+          </div>
+        </div> 
+      </section> -->
+
+      <section>
+        <h2>Monad laws</h2>
+        <p>Monads are required to satisfy:</p>
+        <ul>
+          <li>Identity laws (acting on <code class="tt">m a</code>):
+            <ul>
+              <li>Box from outside: <code class="tt">join . return == id</code></li>
+              <div class="column overlap">
+                <div class="fragment fade-in-then-out" data-fragment-index="1">
+                  <span class="box">
+                    <code class="tt">x</code> 📕
+                  </span>
+                </div>
+
+                <div class="fragment fade-in-then-out" data-fragment-index="2">
+                  <span><code class="tt">return</code> 😈</span>
+                  <span class="box">
+                    <code class="tt">x</code> 📕
+                  </span>
+                </div>
+
+                <div class="fragment fade-in-then-out" data-fragment-index="3">
+                  <span class="big-box">
+                    <span class="box">
+                      <code class="tt">x</code> 📕
+                    </span>
+                  </span>
+                </div>
+                
+                <div class="fragment fade-in-then-out" data-fragment-index="4">
+                  <span><code class="tt">join</code> ✨ </span>
+                  <span class="big-box">
+                    <span class="box">
+                      <code class="tt">x</code> 📕
+                    </span> 
+                  </span>
+                </div>
+
+                <div class="fragment fade-in" data-fragment-index="5">
+                  <span class="box">
+                    <code class="tt">x</code> 📕
+                  </span>
+                </div>
+              </div>
+              <li class="fragment fade-in" data-fragment-index="6">Box from inside: <code class="tt">join . fmap return == id</code></li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Monad laws</h2>
+        <p>Monads are required to satisfy:</p>
+        <ul>
+          <li>Identity laws (acting on <code class="tt">m a</code>):
+            <ul>
+              <li>Box from outside: <code class="tt">join . return == id</code></li>
+              <li>Box from inside: <code class="tt">join . fmap return == id</code></li>
+              <div class="column overlap">
+                <div class="fragment fade-in-then-out" data-fragment-index="1">
+                  <span class="box">
+                    <code class="tt">x</code> 📕
+                  </span>
+                </div>
+
+                <div class="fragment fade-in-then-out" data-fragment-index="2">
+                  <span><code class="tt">fmap</code> 🤝 <code class="tt">return</code></span>
+                  <span class="box">
+                    <code class="tt">x</code> 📕
+                  </span>
+                </div>
+
+                <div class="fragment fade-in-then-out" data-fragment-index="3">
+                  <span class="box">
+                    <span><code class="tt">return</code> 😈 <code class="tt">x</code> 📕</span>
+                  </span>
+                </div>
+
+                <div class="fragment fade-in-then-out" data-fragment-index="4">
+                  <span class="box">
+                    <span class="small-box">
+                      <code class="tt">x</code> 📕
+                    </span>
+                  </span>
+                </div>
+                
+                <div class="fragment fade-in-then-out" data-fragment-index="5">
+                  <span><code class="tt">join</code> ✨ </span>
+                  <span class="box">
+                    <span class="small-box">
+                      <code class="tt">x</code> 📕
+                    </span>
+                  </span>
+                </div>
+                
+                <div class="fragment fade-in-then-out" data-fragment-index="6">
+                  <span class="small-box">
+                    <code class="tt">x</code> 📕
+                  </span>
+                </div>
+
+                <div class="fragment fade-in-then-out" data-fragment-index="6">
+                  <span class="big-box" style="visibility: hidden;"></span>
+                </div>
+              </div>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Monad laws</h2>
+        <ul>
+          <li>Associativity law (acting on <code class="tt">m (m (m a))</code>): </li>
+          <div class="center"><code class="tt">join . join == join . fmap join </code></div>
+        </ul>
+        <div class="column overlap">
+          <div class="fragment fade-in-then-out" data-fragment-index="1">
+            <span class="big-box">
+              <span class="box">
+                <span class="small-box">
+                  <code class="tt">x</code> 📕
+                </span> 📗
+              </span> 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="2">
+            <span><code class="tt">join</code> ✨ </span>
+            <span class="big-box">
+              <span class="box">
+                <span class="small-box">
+                  <code class="tt">x</code> 📕
+                </span> 📗
+              </span> 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="3">
+            <span class="box">
+              <span class="small-box">
+                <code class="tt">x</code> 📕
+              </span> 📗 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="4">
+            <span><code class="tt">join</code> ✨ </span>
+            <span class="box">
+              <span class="small-box">
+                <code class="tt">x</code> 📕
+              </span> 📗 📘
+            </span>
+          </div>
+          
+          <div class="fragment fade-in-then-out" data-fragment-index="5">
+            <span class="small-box">
+              <code class="tt">x</code> 📕 📗 📘
+            </span>
+          </div>
+          
+          <div class="fragment fade-in-then-out" data-fragment-index="6">
+            <span class="big-box">
+              <span class="box">
+                <span class="small-box">
+                  <code class="tt">x</code> 📕
+                </span> 📗
+              </span> 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="7">
+            <span><code class="tt">fmap</code> 🤝 <code class="tt">join</code></span>
+            <span class="big-box">
+              <span class="box">
+                <span class="small-box">
+                  <code class="tt">x</code> 📕
+                </span> 📗
+              </span> 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="8">
+            <span class="big-box">
+              <span><code class="tt">join</code> ✨ </span>
+              <span class="box">
+                <span class="small-box">
+                  <code class="tt">x</code> 📕
+                </span> 📗
+              </span> 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="9">
+            <span class="big-box">
+                <span class="small-box">
+                  <code class="tt">x</code> 📕 📗
+              </span> 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in-then-out" data-fragment-index="10">
+            <span><code class="tt">join</code> ✨ </span>
+            <span class="big-box">
+                <span class="small-box">
+                  <code class="tt">x</code> 📕 📗
+              </span> 📘
+            </span>
+          </div>
+
+          <div class="fragment fade-in" data-fragment-index="11">
+            <span class="small-box">
+              <code class="tt">x</code> 📕 📗 📘
+            </span> 
+          </div>
+        </div>
+
+        <p class="fragment center" data-fragment-index="12">"Joining outer first is the same as joining inner first."</p>
+      </section>
+
+      <section>
+        <h2>Monoid laws</h2>
+        <p>The monoid laws are exactly the same as the monad laws, with outside/inside replace with left/right!</p>
+        <pre><code data-trim class="language-haskell">
+          class Monoid m where
+            (++) :: m -> m -> m
+            empty :: m
+        </code></pre>
+        <ul>
+          <li>Identity laws: <code class="tt">empty ++ x == x</code> and<code class="tt">x ++ empty == x</code></li>
+          <li>Associativity law: <code class="tt">(x ++ y) ++ z == x ++ (y ++ z)</code></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Final takeaways</h2>
+        <ul>
+          <li>Functional programming languages have functions return monadic types instead of producing side effects.</li>
+          <li>The structure of a monad lets you easily compose such functions.</li>
+          <li>Monoids in the category of endofunctors is a correct but terrible definition.</li>
+        </ul>
+      </section>
+
+      <!-- <section>
+        <h2>Natural transformations</h2>
+        <p>Recall <code class="tt">peek :: List a -> Maybe a</code>.</p>
+
+        <p>A function between functors like <code class="tt">peek</code> is called a <em>natural transformation</em> if it satisfies for all <code class="tt"> f :: a -> b</code>:</p>
+        <ul>
+          <li><code class="tt">fmap f . peek == peek . fmap f</code></li>
+        </ul>
+        <p>In other words, <code class="tt">peek</code> can repackage, rearrange, delete, or duplicate data, but not change it.</p>
+        
+      </section>
+
+      <section>
+        <h2>Natural transformations</h2>
+        <p class="theorem"><strong>Theorem.</strong> (Wadler 1989) All functions <code class="tt">eta :: F a -> G a</code> definable in Haskell are natural transformations.</p></p>
+        <p>This is not true in math, because $\eta$ can condition on the type $a$.</p>
+        <p>Let $\eta$</p>
+      </section> -->
       <!-- <section>
         <h2>Overview</h2>
         <p>Our main contribution is an equivalence:</p>
